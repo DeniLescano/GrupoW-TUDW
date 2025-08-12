@@ -1,0 +1,43 @@
+Combo 1 – Gestión Empresarial Integral
+
+Sistema de gestión contable y financiera (escritorio)
+
+Panel administrativo web para control de inventarios y ventas
+
+Aplicación WPA para control de facturación y stock en tiempo real
+
+
+Combo 2 – Comercio y Ventas
+
+Punto de venta (POS) para escritorio con impresión de tickets
+
+Tienda online web con pasarela de pagos integrada
+
+Aplicación WPA para gestión de pedidos y seguimiento de clientes
+
+
+Combo 3 – Salud y Bienestar
+
+Software de escritorio para gestión de turnos, pacientes e historias clínicas
+
+Portal web para reservas y consultas online
+
+WPA para agenda médica y recordatorios de pacientes
+
+
+Combo 4 – Educación y Capacitación
+
+Plataforma de gestión académica en escritorio para administración interna
+
+Campus virtual web con cursos, evaluaciones y certificados
+
+WPA para acceso a materiales, calificaciones y foros de alumnos
+
+
+Combo 5 – Logística y Transporte
+
+Sistema de escritorio para gestión de flotas, rutas y mantenimiento
+
+Panel web para seguimiento de envíos y trazabilidad
+
+WPA para control de entregas y reportes de choferes en tiempo real
