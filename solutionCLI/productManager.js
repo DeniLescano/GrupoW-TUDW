@@ -54,7 +54,7 @@ console.log("Nombre del cuarto producto:", products[3].name);
 */
 
 
-/*
+
 // 3. Recorrido del Array
 // 1) Recorrer el array productos utilizando un bucle for...of e imprimir el nombre y el precio de cada elemento.
 console.log("\n--- 3.1 Recorrido con for...of ---");
@@ -67,7 +67,7 @@ console.log("\n--- 3.2 Recorrido con forEach ---");
 products.forEach(product => {
     console.log(`Producto: ${product.name}, Precio: ${product.price}`);
 });
-*/
+
 
 
 /*
