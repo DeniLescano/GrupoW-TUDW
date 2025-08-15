@@ -67,68 +67,138 @@ function printSeparator(title, color = colors.cyan) {
     console.log(`${color}${line}${colors.reset}\n`);
 }
 
-// productos con paginación
-function showProductsPaginated(products, title, pageSize = 3) {
+// productos con paginación interactiva
+function showProductsPaginated(products, title, pageSize = 3, rl = null, callback = null) {
     printSeparator(title, colors.green);
     
     if (products.length === 0) {
         printColor("No hay productos para mostrar", colors.red);
+        if (callback) callback();
         return;
     }
     
     const totalPages = Math.ceil(products.length / pageSize);
     
-    for (let page = 0; page < totalPages; page++) {
-        const start = page * pageSize;
+    // Si no hay readline, mostrar todo sin paginación
+    if (!rl) {
+        products.forEach((product, index) => {
+            printColor(`[${index + 1}] ${product.name}`, colors.bright);
+            console.log(`    ID: ${product.id} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+            console.log(`    Descripción: ${product.description}`);
+            console.log('');
+        });
+        if (callback) callback();
+        return;
+    }
+    
+    // Paginación interactiva
+    let currentPage = 0;
+    
+    function mostrarPagina() {
+        const start = currentPage * pageSize;
         const end = Math.min(start + pageSize, products.length);
         const pageProducts = products.slice(start, end);
         
-        printColor(`--- Página ${page + 1} de ${totalPages} ---`, colors.yellow);
+        console.clear();
+        printSeparator(title, colors.green);
+        printColor(`--- Página ${currentPage + 1} de ${totalPages} ---`, colors.yellow);
         
         pageProducts.forEach((product, index) => {
             const globalIndex = start + index;
             printColor(`[${globalIndex + 1}] ${product.name}`, colors.bright);
-            console.log(`    ID: ${product.id} | Precio: $${product.price} | Stock: ${product.stock}`);
+            console.log(`    ID: ${product.id} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
             console.log(`    Descripción: ${product.description}`);
             console.log('');
         });
         
-        if (page < totalPages - 1) {
-            printColor("Presiona Enter para continuar...", colors.blue);
+        // Opciones de navegación
+        if (totalPages > 1) {
+            printColor("--- NAVEGACIÓN ---", colors.cyan);
+            if (currentPage > 0) {
+                printColor("A - Página anterior", colors.blue);
+            }
+            if (currentPage < totalPages - 1) {
+                printColor("S - Página siguiente", colors.blue);
+            }
+            printColor("M - Volver al menú", colors.green);
+            printColor("Enter - Continuar", colors.yellow);
+            
+            rl.question('Selecciona una opción: ', (answer) => {
+                const opcion = answer.trim().toLowerCase();
+                
+                if (opcion === 'a' && currentPage > 0) {
+                    currentPage--;
+                    mostrarPagina();
+                } else if (opcion === 's' && currentPage < totalPages - 1) {
+                    currentPage++;
+                    mostrarPagina();
+                } else if (opcion === 'm') {
+                    if (callback) callback();
+                } else {
+                    // Enter o cualquier otra tecla - continuar
+                    if (currentPage < totalPages - 1) {
+                        currentPage++;
+                        mostrarPagina();
+                    } else {
+                        // Última página
+                        if (callback) callback();
+                    }
+                }
+            });
+        } else {
+            // Solo una página
+            if (callback) callback();
         }
     }
+    
+    mostrarPagina();
 }
 
 // ============================================================================
-// FUNCIONES ESPECÍFICAS DEL TP
+// FUNCIONES 
 // ============================================================================
+
+// Función para formatear precios (integrada de Denise) - Mejorada para compatibilidad
+const formatPrice = (value) => {
+    try {
+        // Intentar formato argentino primero
+        return Number(value).toLocaleString('es-AR');
+    } catch (error) {
+        // Fallback: formato estándar con separadores de miles
+        return Number(value).toLocaleString();
+    }
+};
+
+// Función para obtener el siguiente ID disponible
+const getNextId = () => {
+    return products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+};
+
 
 // operaciones básicas
 function ejecutarOperacionesBasicas() {
     printSeparator("2. OPERACIONES BÁSICAS Y ACCESO", colors.green);
     
-    
     console.log("\n--- 2.1 Longitud del Array ---");
     console.log("La cantidad de productos es:", products.length);
     
     console.log("\n--- 2.2 Acceso por Índice ---");
-    console.log("Nombre del segundo producto:", products[1].name);
-    console.log("Nombre del cuarto producto:", products[3].name);
+    console.log("Nombre del segundo producto:", products[1]?.name);
+    console.log("Nombre del cuarto producto:", products[3]?.name);
 }
 
 // recorridos
 function ejecutarRecorridos() {
     printSeparator("3. RECORRIDOS DEL ARRAY", colors.green);
     
-    
     console.log("\n--- 3.1 Recorrido con for...of ---");
     for (const product of products) {
-        console.log(`Nombre: ${product.name}, Precio: ${product.price}`);
+        console.log(`${product.name} - $${formatPrice(product.price)}`);
     }
     
     console.log("\n--- 3.2 Recorrido con forEach ---");
     products.forEach(product => {
-        console.log(`Producto: ${product.name}, Precio: ${product.price}`);
+        console.log(`Producto: ${product.name}, Precio: $${formatPrice(product.price)}`);
     });
 }
 
@@ -136,66 +206,101 @@ function ejecutarRecorridos() {
 function ejecutarCRUD() {
     printSeparator("4. MÉTODOS CRUD - AGREGAR/ELIMINAR", colors.green);
     
-    // copia  array para no modificar el original
+    // copia del array para no modificar el original
     let productsCopy = [...products];
     
     console.log("\n--- 4.1 push() - Agregar elementos al final ---");
+    console.log("Agregando productos predefinidos...");
     productsCopy.push(
         { id: 6, name: "Combo 6 - Marketing Digital", description: "Gestión de redes, SEO y campañas.", price: 3200, stock: 30 },
         { id: 7, name: "Combo 7 - Diseño Gráfico", description: "Creación de logos, branding y material visual.", price: 2800, stock: 18 }
     );
-    console.log("Array después de push():", productsCopy);
+    console.log("Array después de push():");
+    productsCopy.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
     
     console.log("\n--- 4.2 pop() - Eliminar último elemento ---");
     const productoEliminadoPop = productsCopy.pop();
-    console.log("Producto eliminado con pop():", productoEliminadoPop);
-    console.log("Array después de pop():", productsCopy);
+    console.log("Producto eliminado con pop():", productoEliminadoPop?.name, `- $${formatPrice(productoEliminadoPop?.price)}`);
+    console.log("Array después de pop():");
+    productsCopy.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
     
     console.log("\n--- 4.3 unshift() - Agregar elemento al inicio ---");
     productsCopy.unshift({ id: 0, name: "Combo 0 - Consultoría Inicial", description: "Análisis de negocio y estrategia.", price: 1500, stock: 50 });
-    console.log("Array después de unshift():", productsCopy);
+    console.log("Array después de unshift():");
+    productsCopy.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
     
     console.log("\n--- 4.4 shift() - Eliminar primer elemento ---");
     const productoEliminadoShift = productsCopy.shift();
-    console.log("Producto eliminado con shift():", productoEliminadoShift);
-    console.log("Array después de shift():", productsCopy);
+    console.log("Producto eliminado con shift():", productoEliminadoShift?.name, `- $${formatPrice(productoEliminadoShift?.price)}`);
+    console.log("Array después de shift():");
+    productsCopy.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
 }
 
-// filtros y mapeos 
+// filtros y mapeos con funciones nombradas (integrado de punto4.js)
 function ejecutarFiltrosMapeos() {
     printSeparator("5. FILTROS Y MAPEOS - FILTER, MAP, FIND", colors.green);
     
-    // copia  array 
+    // copia del array
     let productsCopy = [...products];
     
     console.log("\n--- 5.1 filter() - Filtrar por stock > 0 ---");
     console.log("MÉTODO UTILIZADO: filter()");
-    console.log("Función: product => product.stock > 0");
-    const productosConStock = productsCopy.filter(product => product.stock > 0);
-    console.log("Resultado: Nuevo array 'productosConStock':", productosConStock);
+    console.log("Función: mayorCero(producto) => producto.stock > 0");
+    
+    // Función nombrada integrada de punto4.js
+    function mayorCero(producto) {
+        return producto.stock > 0;
+    }
+    
+    const productosConStock = productsCopy.filter(mayorCero);
+    console.log("Resultado: Nuevo array 'productosConStock':");
+    productosConStock.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
     
     console.log("\n--- 5.2 map() - Extraer nombres ---");
     console.log("MÉTODO UTILIZADO: map()");
-    console.log("Función: product => product.name");
-    const nombresProductos = productsCopy.map(product => product.name);
+    console.log("Función: nombres(producto) => producto.name");
+    
+    // Función nombrada integrada de punto4.js
+    function nombres(producto) {
+        return producto.name;
+    }
+    
+    const nombresProductos = productsCopy.map(nombres);
     console.log("Resultado: Nuevo array 'nombresProductos':", nombresProductos);
     
     console.log("\n--- 5.3 find() - Buscar producto por ID ---");
     
     // producto que existe
     console.log("MÉTODO UTILIZADO: find()");
-    console.log("Función: product => product.id === 3");
+    console.log("Función: elementoCinco(producto) => producto.id === 3");
     console.log("Buscando producto con id:3 (existe)");
-    const productoEncontrado = productsCopy.find(product => product.id === 3);
+    
+    // Función nombrada integrada de punto4.js
+    function elementoCinco(producto) {
+        return producto.id === 3;
+    }
+    
+    const productoEncontrado = productsCopy.find(elementoCinco);
     if (productoEncontrado) {
-        console.log("Producto encontrado:", productoEncontrado);
+        console.log("Producto encontrado:");
+        console.log(`  ID: ${productoEncontrado.id} | ${productoEncontrado.name} | Precio: $${formatPrice(productoEncontrado.price)} | Stock: ${productoEncontrado.stock}`);
     } else {
         console.log("No se encontró el producto con id:3.");
     }
     
     // producto que NO existe
     console.log("\nMÉTODO UTILIZADO: find()");
-    console.log("Función: product => product.id === 99");
+    console.log("Función: producto => producto.id === 99");
     console.log("Buscando producto con id:99 (no existe)");
     const productoNoEncontrado = productsCopy.find(product => product.id === 99);
     if (productoNoEncontrado) {
@@ -210,55 +315,140 @@ function ejecutarFiltrosMapeos() {
     console.log("Buscando primer producto con stock > 25");
     const productoStockAlto = productsCopy.find(product => product.stock > 25);
     if (productoStockAlto) {
-        console.log("Producto con stock > 25 encontrado:", productoStockAlto);
+        console.log("Producto con stock > 25 encontrado:");
+        console.log(`  ID: ${productoStockAlto.id} | ${productoStockAlto.name} | Precio: $${formatPrice(productoStockAlto.price)} | Stock: ${productoStockAlto.stock}`);
     } else {
         console.log("No se encontró producto con stock > 25.");
     }
 }
 
-// ordenamiento 
+// ordenamiento con slice() 
 function ejecutarOrdenamiento() {
     printSeparator("6. ORDENAMIENTO Y VERIFICACIÓN - SORT", colors.green);
     
-    // copia 
-    let productsCopy = [...products];
+    // copia del array 
+    let productsCopy = products.slice();
     
     console.log("\n--- 6.1 sort() - Ordenar por precio decreciente ---");
-    const productosOrdenados = [...productsCopy].sort((a, b) => b.price - a.price);
-    console.log("Nuevo array 'productosOrdenados' (de mayor a menor precio):", productosOrdenados);
+    const productosOrdenados = productsCopy.sort((a, b) => b.price - a.price);
+    console.log("Nuevo array 'productosOrdenados' (de mayor a menor precio):");
+    productosOrdenados.forEach(product => {
+        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+    });
     
     console.log("\n--- 6.2 Verificación de resultados ---");
-    console.log("Precio más alto:", productosOrdenados[0].price);
-    console.log("Precio más bajo:", productosOrdenados[productosOrdenados.length - 1].price);
+    console.log("Precio más alto:", `$${formatPrice(productosOrdenados[0].price)}`);
+    console.log("Precio más bajo:", `$${formatPrice(productosOrdenados[productosOrdenados.length - 1].price)}`);
     console.log("Total de productos ordenados:", productosOrdenados.length);
 }
 
 // ============================================================================
-// FUNCIÓN PRINCIPAL DEL TP
+// FUNCIONES INTERACTIVAS 
 // ============================================================================
 
-// TP completo con formato modular y visual
-function ejecutarTPCompleto() {
-    printSeparator("EJECUTANDO TP COMPLETO - FORMATO MODULAR", colors.magenta);
+// Agregar producto 
+function agregarProductoInteractivo(rl, callback) {
+    printSeparator("AGREGAR PRODUCTO INTERACTIVO", colors.blue);
     
-    showProductsPaginated(products, "1. ARRAY INICIAL - 5 PRODUCTOS");
-    ejecutarOperacionesBasicas();
-    ejecutarRecorridos();
-    ejecutarCRUD();
-    ejecutarFiltrosMapeos();
-    ejecutarOrdenamiento();
+    rl.question("Ingrese nombre del producto: ", (name) => {
+        rl.question("Ingrese precio del producto: ", (price) => {
+            rl.question("Ingrese descripción del producto: ", (description) => {
+                rl.question("Ingrese stock del producto: ", (stock) => {
+                    const nuevoProducto = {
+                        id: getNextId(),
+                        name,
+                        price: Number(price),
+                        description,
+                        stock: Number(stock)
+                    };
+                    
+                    products.push(nuevoProducto);
+                    console.log("Producto agregado exitosamente:");
+                    console.log(`  ID: ${nuevoProducto.id} | ${nuevoProducto.name} | Precio: $${formatPrice(nuevoProducto.price)} | Stock: ${nuevoProducto.stock}`);
+                    console.log("Array actualizado:");
+                    products.forEach(product => {
+                        console.log(`  ID: ${product.id} | ${product.name} | Precio: $${formatPrice(product.price)} | Stock: ${product.stock}`);
+                    });
+                    
+                    // Preguntar si quiere continuar agregando
+                    rl.question('\n¿Desea agregar otro producto? (s/n): ', (respuesta) => {
+                        if (respuesta.toLowerCase() === 's' || respuesta.toLowerCase() === 'si' || respuesta.toLowerCase() === 'y' || respuesta.toLowerCase() === 'yes') {
+                            agregarProductoInteractivo(rl, callback);
+                        } else {
+                            if (callback) callback();
+                        }
+                    });
+                });
+            });
+        });
+    });
+}
+
+// Buscar producto 
+function buscarProductoInteractivo(rl, callback) {
+    printSeparator("BUSCAR PRODUCTO POR ID", colors.blue);
     
-    printSeparator("TP COMPLETADO EXITOSAMENTE", colors.green);
+    rl.question("Ingrese el ID del producto: ", (idIngresado) => {
+        const encontrado = products.find(p => p.id === Number(idIngresado));
+        if (encontrado) {
+            console.log("Producto encontrado:");
+            console.log(`  ID: ${encontrado.id} | ${encontrado.name} | Precio: $${formatPrice(encontrado.price)} | Stock: ${encontrado.stock}`);
+            console.log(`  Descripción: ${encontrado.description}`);
+        } else {
+            console.log("No se encontró el producto con ID:", idIngresado);
+        }
+        
+        // Preguntar si quiere continuar buscando
+        rl.question('\n¿Desea buscar otro producto? (s/n): ', (respuesta) => {
+            if (respuesta.toLowerCase() === 's' || respuesta.toLowerCase() === 'si' || respuesta.toLowerCase() === 'y' || respuesta.toLowerCase() === 'yes') {
+                buscarProductoInteractivo(rl, callback);
+            } else {
+                if (callback) callback();
+            }
+        });
+    });
 }
 
 // ============================================================================
-// MENÚ INTERACTIVO
+// FUNCIÓN PRINCIPAL 
 // ============================================================================
 
-// menú principal
+// TP completo con formato modular y visual
+function ejecutarTPCompleto(rl = null, callback = null) {
+    printSeparator("EJECUTANDO TP COMPLETO - FORMATO MODULAR", colors.magenta);
+    
+    if (rl) {
+        // Con paginación interactiva
+        showProductsPaginated(products, "1. ARRAY INICIAL - 5 PRODUCTOS", 3, rl, () => {
+            ejecutarOperacionesBasicas();
+            ejecutarRecorridos();
+            ejecutarCRUD();
+            ejecutarFiltrosMapeos();
+            ejecutarOrdenamiento();
+            
+            printSeparator("TP COMPLETADO EXITOSAMENTE", colors.green);
+            if (callback) callback();
+        });
+    } else {
+        // Sin paginación (para compatibilidad)
+        showProductsPaginated(products, "1. ARRAY INICIAL - 5 PRODUCTOS");
+        ejecutarOperacionesBasicas();
+        ejecutarRecorridos();
+        ejecutarCRUD();
+        ejecutarFiltrosMapeos();
+        ejecutarOrdenamiento();
+        
+        printSeparator("TP COMPLETADO EXITOSAMENTE", colors.green);
+    }
+}
+
+// ============================================================================
+// MENÚ  
+// ============================================================================
+
 function showMenu() {
     console.clear();
-    printSeparator("MENÚ PRINCIPAL - TP 1 JAVASCRIPT- Grupo W", colors.magenta);
+    printSeparator("MENÚ PRINCIPAL - TP 1 JAVASCRIPT - Grupo W", colors.magenta);
     
     const menuOptions = [
         "1. Ver Array Inicial (5 productos)",
@@ -268,7 +458,9 @@ function showMenu() {
         "5. Filtros y Mapeos (filter, map, find - casos de éxito y fallo)",
         "6. Ordenamiento y Verificación (sort)",
         "7. Ejecutar TP Completo (Formato Modular)",
-        "8. Salir"
+        "8. Agregar Producto Interactivo (Input del usuario)",
+        "9. Buscar Producto por ID (Input del usuario)",
+        "0. Salir"
     ];
     
     menuOptions.forEach(option => {
@@ -278,7 +470,7 @@ function showMenu() {
     printSeparator("", colors.magenta);
 }
 
-// menú
+// menú principal 
 function mainMenu() {
     const readline = require('readline');
     const rl = readline.createInterface({
@@ -288,11 +480,12 @@ function mainMenu() {
     
     function mostrarMenu() {
         showMenu();
-        rl.question('Selecciona una opción (1-8): ', (answer) => {
+        rl.question('Selecciona una opción (0-9): ', (answer) => {
             switch(answer.trim()) {
                 case '1':
-                    showProductsPaginated(products, "ARRAY INICIAL - 5 PRODUCTOS");
-                    rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    showProductsPaginated(products, "ARRAY INICIAL - 5 PRODUCTOS", 3, rl, () => {
+                        rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    });
                     break;
                 case '2':
                     ejecutarOperacionesBasicas();
@@ -315,10 +508,21 @@ function mainMenu() {
                     rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
                     break;
                 case '7':
-                    ejecutarTPCompleto();
-                    rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    ejecutarTPCompleto(rl, () => {
+                        rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    });
                     break;
                 case '8':
+                    agregarProductoInteractivo(rl, () => {
+                        rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    });
+                    break;
+                case '9':
+                    buscarProductoInteractivo(rl, () => {
+                        rl.question('\nPresiona Enter para volver al menú...', mostrarMenu);
+                    });
+                    break;
+                case '0':
                     printColor("¡Hasta luego!", colors.green);
                     rl.close();
                     break;
