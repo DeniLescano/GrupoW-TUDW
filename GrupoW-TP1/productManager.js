@@ -1,3 +1,21 @@
+//TP 1 - javaScript, Catedra: Programacion 3 - FCAD-UNER
+
+//Autores|Integrantes {
+ 
+    //Francisco Javier Acosta
+    //Denise Aguilera
+    //Denise Ailen Lescano
+    //Nahuel Marcilli
+    //Julieta Roveres
+
+// }: 
+
+   
+
+
+
+
+
 // ============================================================================
 // ARRAY DE PRODUCTOS - DATOS INICIALES
 // ============================================================================
