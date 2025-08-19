@@ -37,6 +37,7 @@ const products = [
     }
 ];
 
+<<<<<<< HEAD
 // Función para formatear precios
 const formatPrice = (value) => Number(value).toLocaleString('es-AR');
 
@@ -196,3 +197,93 @@ const iniciarMenu = () => {
 // Iniciar programa
 console.log("Array de productos original:", products);
 iniciarMenu();
+=======
+// Muestra el array original
+console.log("Array de productos original:", products);
+
+
+/*
+// 2. Operaciones Básicas y Acceso
+// 1) Imprimir la longitud total del array productos.
+console.log("\n--- 2.1 Longitud del Array ---");
+console.log("La cantidad de productos es:", products.length);
+
+// 2) Acceder e imprimir por consola el nombre del segundo y cuarto elemento del array utilizando su índice.
+console.log("\n--- 2.2 Acceso por Índice ---");
+console.log("Nombre del segundo producto:", products[1].name);
+console.log("Nombre del cuarto producto:", products[3].name);
+*/
+
+
+/*
+// 3. Recorrido del Array
+// 1) Recorrer el array productos utilizando un bucle for...of e imprimir el nombre y el precio de cada elemento.
+console.log("\n--- 3.1 Recorrido con for...of ---");
+for (const product of products) {
+    console.log(`Nombre: ${product.name}, Precio: ${product.price}`);
+}
+
+// 2) Recorrer el array productos utilizando el método forEach() e imprimir la misma información.
+console.log("\n--- 3.2 Recorrido con forEach ---");
+products.forEach(product => {
+    console.log(`Producto: ${product.name}, Precio: ${product.price}`);
+});
+*/
+
+
+/*
+// 4. Manipulación de Arrays
+console.log("\n--- 4. Manipulación de Arrays ---");
+
+// 1) Agregar dos elementos al final del array productos utilizando push().
+console.log("\n--- 4.1 push() ---");
+products.push(
+    { id: 6, name: "Combo 6 - Marketing Digital", description: "Gestión de redes, SEO y campañas.", price: 3200, stock: 30 },
+    { id: 7, name: "Combo 7 - Diseño Gráfico", description: "Creación de logos, branding y material visual.", price: 2800, stock: 18 }
+);
+console.log("Array después de push():", products);
+
+// 2) Eliminar el último elemento del array productos utilizando pop().
+console.log("\n--- 4.2 pop() ---");
+const productoEliminadoPop = products.pop();
+console.log("Producto eliminado con pop():", productoEliminadoPop);
+console.log("Array después de pop():", products);
+
+// 3) Agregar un nuevo elemento al inicio del array productos utilizando unshift().
+console.log("\n--- 4.3 unshift() ---");
+products.unshift({ id: 0, name: "Combo 0 - Consultoría Inicial", description: "Análisis de negocio y estrategia.", price: 1500, stock: 50 });
+console.log("Array después de unshift():", products);
+
+// 4) Eliminar el primer elemento del array productos utilizando shift().
+console.log("\n--- 4.4 shift() ---");
+const productoEliminadoShift = products.shift();
+console.log("Producto eliminado con shift():", productoEliminadoShift);
+console.log("Array después de shift():", products);
+
+// 5) Crear un nuevo array llamado productosConStock que contenga solo los elementos con stock > 0.
+console.log("\n--- 4.5 filter() ---");
+const productosConStock = products.filter(product => product.stock > 0);
+console.log("Nuevo array 'productosConStock':", productosConStock);
+
+// 6) Crear un nuevo array llamado nombresProductos que contenga solo los nombres de todos los productos.
+console.log("\n--- 4.6 map() ---");
+const nombresProductos = products.map(product => product.name);
+console.log("Nuevo array 'nombresProductos':", nombresProductos);
+
+// 7) Encontrar y guardar el primer producto que tenga un id específico (ej. id:3).
+console.log("\n--- 4.7 find() ---");
+const productoEncontrado = products.find(product => product.id === 3);
+if (productoEncontrado) {
+    console.log("Producto con id:3 encontrado:", productoEncontrado);
+} else {
+    console.log("No se encontró el producto con id:3.");
+}
+
+// 8) Crear un nuevo array llamado productosOrdenados por precio en orden decreciente.
+console.log("\n--- 4.8 sort() ---");
+// Se crea una copia con [...products] para no modificar el array original.
+const productosOrdenados = [...products].sort((a, b) => b.price - a.price);
+console.log("Nuevo array 'productosOrdenados' (de mayor a menor precio):", productosOrdenados);
+
+*/
+>>>>>>> prototypes
