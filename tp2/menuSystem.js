@@ -68,7 +68,6 @@ export default class MenuSystem {
 
 // NUEVO MENU // 
 
-
 import readlineSync from "readline-sync";
 
 export default class MenuSystem {
@@ -86,9 +85,9 @@ export default class MenuSystem {
     }
 
     const tabla = productos.map(p => ({
-      ID: p.id || "-",
-      Nombre: p.title || p.nombre || "-",
-      Precio: `$${p.price || p.precio || 0}`,
+      ID: p.id ?? "-",
+      Nombre: p.title ?? p.nombre ?? "-",
+      Precio: p.price != null ? `$${p.price}` : "-",
       Categoría: p.category || "-"
     }));
 
@@ -104,17 +103,19 @@ export default class MenuSystem {
     console.log("5. Ver productos guardados (FileSystem)");
     console.log("6. Agregar producto guardado (FileSystem)");
     console.log("7. Eliminar productos por precio (FileSystem)");
+    console.log("8. Ver productos por precio máximo");// Nueva opcion 
+    console.log("9. Obtener productos limitados de la API");      // Nueva opcion
+    console.log("10. Guardar productos de la API en archivo local"); // Nueva opcion
+    console.log("11. Modificar producto de la API");             // Nueva opcion
     console.log("0. Salir");
 
     const option = readlineSync.question("Elegí una opción: ");
     await this.handleOption(option);
 
-    // Pausa antes de volver al menú
     console.log("\nPresioná ENTER para volver al menú...");
     readlineSync.question('');
-    await this.showMenu(); // vuelve a mostrar el menú
-}
-
+    await this.showMenu();
+  }
 
   async handleOption(option) {
     try {
@@ -193,6 +194,53 @@ export default class MenuSystem {
           }
           break;
 
+        case "8":
+          try {
+            const maxPrice = readlineSync.questionFloat("Mostrar productos con precio hasta: ");
+            const productsFile = this.fileManager.readProducts();
+            const filtered = productsFile.filter(p => p.price <= maxPrice);
+            this.mostrarProductos(filtered, `Productos hasta $${maxPrice}`);
+          } catch (error) {
+            console.error("❌ Error al filtrar productos por precio.");
+          }
+          break;
+
+        // NUEVO CASES //
+        case "9": // Obtener productos limitados de la API
+          try {
+            const limit = readlineSync.questionInt("Cantidad de productos a recuperar: ");
+            const limitedProducts = await this.apiManager.getLimitedProducts(limit);
+            this.mostrarProductos(limitedProducts, `Primeros ${limit} productos`);
+          } catch (error) {
+            console.error("❌ Error al recuperar productos limitados:", error.message);
+          }
+          break;
+
+        case "10": // Guardar productos de la API en archivo local
+          try {
+            const products = await this.apiManager.getAllProducts();
+            this.fileManager.saveApiProducts(products); // usa el método nuevo que agregamos
+          } catch (error) {
+            console.error("❌ Error al guardar productos:", error.message);
+          }
+          break;
+
+        case "11": // Modificar producto de la API (UPDATE)
+          try {
+            const id = readlineSync.questionInt("ID del producto a modificar: ");
+            const title = readlineSync.question("Nuevo nombre (dejar vacío para no cambiar): ");
+            const price = readlineSync.questionFloat("Nuevo precio (0 para no cambiar): ");
+            const updatedData = {};
+            if (title) updatedData.title = title;
+            if (price) updatedData !== 0 && (updatedData.price = price); // solo si el usuario puso un valor
+            const updatedProduct = await this.apiManager.updateProduct(id, updatedData);
+            console.log("✅ Producto actualizado:");
+            this.mostrarProductos([updatedProduct], `Producto con ID ${id}`);
+          } catch (error) {
+            console.error("❌ Error al actualizar producto:", error.message);
+          }
+          break;
+
         case "0":
           console.log("¡Chau!");
           process.exit();
@@ -201,10 +249,9 @@ export default class MenuSystem {
           console.log("⚠️ Opción inválida. Intenta nuevamente.");
       }
     } catch (error) {
-      // por si algo inesperado falla
       console.error("❌ Ocurrió un error inesperado:", error.message);
     }
 
-    await this.showMenu(); // vuelve al menú
+    await this.showMenu();
   }
 }

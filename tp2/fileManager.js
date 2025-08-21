@@ -28,4 +28,10 @@ export default class FileManager {
     products = products.filter((p) => p.price <= price);
     this.saveProducts(products);
   }
+
+  // --- nuevo: guardar productos desde la api en el archivo local ---
+  saveApiProducts(products) {
+    this.saveProducts(products); // simplemente reutilizo saveproducts
+    console.log(`✅ Se guardaron ${products.length} productos de la API en ${this.filename}`);
+  }
 }

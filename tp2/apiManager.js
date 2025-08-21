@@ -30,4 +30,20 @@ export default class ApiManager {
     });
     return response.json();
   }
+
+  // --- nuevo: obtener un N limitado de productos ---
+  async getLimitedProducts(limit) {
+    const response = await fetch(`${this.baseUrl}/products?limit=${limit}`);
+    return response.json();
+  }
+
+  // --- nuevo: modificar un producto (update) ---
+  async updateProduct(id, updatedData) {
+    const response = await fetch(`${this.baseUrl}/products/${id}`, {
+      method: "PUT", // put para actualizar
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+    });
+    return response.json();
+  }
 }
