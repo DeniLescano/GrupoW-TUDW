@@ -1,6 +1,16 @@
 
 // Facultad de Ciencias de la Administración - UNER - Programación III
 
+//Autores|Integrantes {
+ 
+    //Francisco Javier Acosta
+    //Denise Aguilera
+    //Denise Ailen Lescano
+    //Nahuel Marcilli
+    //Julieta Roveres
+
+// }: 
+
 // ==================== CONFIGURACIÓN INICIAL ====================
 const BASE_URL = "https://fakestoreapi.com";
 const FILENAME = "productos.json";
